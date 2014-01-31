@@ -1,0 +1,11 @@
+-cmd "lessc src/style.less bin/styles.css"
+-cp ../tink_core/src
+-cp ../tink_macro/src
+-cp ../tink_lang/src
+-cp ../tink_csss/src
+-cp ../tinx_dom/src
+-cp src
+#-dce full
+-main Main
+-js bin/knatterton.js
+#iota start bin\index.html

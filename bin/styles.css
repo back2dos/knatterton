@@ -1,0 +1,88 @@
+body {
+  background: #FFF;
+  font-family: DinC, sans-serif;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+.nav {
+  user-select: none;
+  -webkit-user-select: none;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 150px;
+  background: #008000;
+}
+.nav .icon {
+  height: 2em;
+}
+.nav h2 {
+  width: 10em;
+  color: white;
+  font-size: 2em;
+  margin: 0;
+}
+.nav h2 img {
+  display: none;
+}
+.nav h2 span {
+  padding: .5em;
+  display: inline-block;
+}
+.nav h2:last-of-type {
+  margin-left: 50px;
+}
+.bg {
+  background: white;
+  position: fixed;
+  top: 150px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.fresh {
+  display: none;
+}
+.canvas {
+  cursor: ew-resize;
+}
+.canvas .text {
+  transition: opacity 0.5s;
+  user-select: none;
+  -webkit-user-select: none;
+  position: absolute;
+  font-size: .8em;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.canvas .text .content {
+  margin: 0;
+  padding: 20px;
+  border: 2px dashed rgba(0, 128, 0, 0.3);
+  background: rgba(245, 250, 245, 0.95);
+  transition: border 0.2s, opacity 0.2s, background 0.2s;
+}
+.canvas .text .content h1,
+.canvas .text .content h2,
+.canvas .text .content h3,
+.canvas .text .content h4,
+.canvas .text .content h5,
+.canvas .text .content h6,
+.canvas .text .content a {
+  color: #008000;
+  margin-top: 0;
+}
+.canvas .text .content:not([contenteditable]) {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.canvas .text .content[contenteditable] {
+  cursor: text;
+}
+.canvas .text .content:hover,
+.canvas .text .content:focus {
+  background: white;
+  border: 2px dashed #008000;
+}
