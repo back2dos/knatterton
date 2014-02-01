@@ -1,11 +1,178 @@
 (function () { "use strict";
 var $estr = function() { return js.Boot.__string_rec(this,''); };
+var tink = {}
+tink.Lang = function() { }
+tink.Lang.__name__ = true;
+var Grid = function(viewport,container,cols,rows,nav) {
+	this.viewport = viewport;
+	this.container = container;
+	this.cols = cols;
+	this.rows = rows;
+	this.nav = nav;
+};
+Grid.__name__ = true;
+Grid.__interfaces__ = [tink.Lang];
+Grid.genId = function(prefix) {
+	return "" + prefix + "-" + ((function($this) {
+		var $r;
+		var __tink_output171 = [];
+		{
+			var _g = 0;
+			while(_g < 4) {
+				var i = _g++;
+				__tink_output171.push(((function($this) {
+					var $r;
+					var __tink_output170 = [];
+					{
+						var _g1 = 0;
+						while(_g1 < 4) {
+							var i1 = _g1++;
+							__tink_output170.push(Grid.chars.charAt(Std.random(Grid.chars.length)));
+						}
+					}
+					$r = __tink_output170;
+					return $r;
+				}($this))).join(""));
+			}
+		}
+		$r = __tink_output171;
+		return $r;
+	}(this))).join("-");
+}
+Grid.prototype = {
+	get_empty: function() {
+		return this.get_width() == 0;
+	}
+	,get_height: function() {
+		return this.container.querySelectorAll("[data-row]").length;
+	}
+	,get_width: function() {
+		return this.container.querySelectorAll("[data-row]:first-child [data-col]").length;
+	}
+	,get_col: function() {
+		return this.getIndex("[data-row] [data-col].focused");
+	}
+	,get_row: function() {
+		return this.getIndex("[data-row] [data-col].focused",function(e) {
+			return $dom.path(e,{ max : 1})[0];
+		});
+	}
+	,addCol: function(name) {
+		var id = Grid.genId("col");
+		var _g = 0, _g1 = this.container.querySelectorAll("[data-row]");
+		while(_g < _g1.length) {
+			var e = _g1[_g];
+			++_g;
+			e.appendChild(this.makeCanvas(id));
+		}
+		this.set(id,name);
+	}
+	,makeCanvas: function(id) {
+		return $dom.add($dom.set($dom.set($dom.tag("div"),"class","canvas"),"data-col",id),$dom.set($dom.tag("div"),"class","zoom-layer"));
+	}
+	,addRow: function(name) {
+		var id = Grid.genId("row");
+		var row = $dom.set($dom.tag("div"),"data-row",id);
+		this.set(id,name);
+		if(this.container.firstElementChild != null) {
+			var _g = 0, _g1 = this.container.firstElementChild.children;
+			while(_g < _g1.length) {
+				var c = _g1[_g];
+				++_g;
+				var c1 = c;
+				$dom.add(row,this.makeCanvas(c1.getAttribute("data-col")));
+			}
+		}
+		this.container.appendChild(row);
+	}
+	,navigate: function(row,col) {
+		var this1 = this.viewport;
+		this1.setAttribute("data-focus","canvas");
+		"canvas";
+		var _g = 0, _g1 = this.container.querySelectorAll(".canvas");
+		while(_g < _g1.length) {
+			var canvas = _g1[_g];
+			++_g;
+			var canvas1 = canvas;
+			tinx.dom._ClassList.ClassList_Impl_.remove(canvas1,"focused");
+		}
+		var col1 = this.container.querySelector("[data-row]:nth-child(" + (row + 1) + ") [data-col]:nth-child(" + (col + 1) + ")"), row1 = this.container.querySelector("[data-row]:nth-child(" + (row + 1) + ")");
+		col1.classList.add("focused");
+		var rowName = this.get(row1.getAttribute("data-row")), colName = this.get(col1.getAttribute("data-col"));
+		var status = (function($this) {
+			var $r;
+			var _g = new haxe.ds.StringMap();
+			_g.set("[data-action=\"next row\"]",$this.get_row() < $this.get_height() - 1);
+			_g.set("[data-action=\"prev row\"]",$this.get_row() > 0);
+			_g.set("[data-action=\"next col\"]",$this.get_col() < $this.get_width() - 1);
+			_g.set("[data-action=\"prev col\"]",$this.get_col() > 0);
+			$r = _g;
+			return $r;
+		}(this));
+		var __tink_tmp172 = status;
+		var $it0 = __tink_tmp172.keys();
+		while( $it0.hasNext() ) {
+			var selector = $it0.next();
+			var enabled = __tink_tmp172.get(selector);
+			var _g1 = 0, _g2 = js.Browser.document.querySelectorAll(selector);
+			while(_g1 < _g2.length) {
+				var b = _g2[_g1];
+				++_g1;
+				var b1 = b;
+				b1.disabled = !enabled;
+			}
+		}
+		var _g1 = 0, _g2 = js.Browser.document.querySelectorAll("" + this.nav + " h2:first-of-type span");
+		while(_g1 < _g2.length) {
+			var e = _g2[_g1];
+			++_g1;
+			var e1 = e;
+			e1.innerHTML = colName;
+		}
+		var _g1 = 0, _g2 = js.Browser.document.querySelectorAll("" + this.nav + " h2:last-of-type span");
+		while(_g1 < _g2.length) {
+			var e = _g2[_g1];
+			++_g1;
+			var e1 = e;
+			e1.innerHTML = rowName;
+		}
+	}
+	,navigateTo: function(canvas) {
+		var col = $dom.siblings(canvas,{ back : true}).length, row = $dom.siblings($dom.path(canvas,{ max : 1})[0],{ back : true}).length;
+		this.navigate(row,col);
+	}
+	,getIndex: function(s,get) {
+		var e = this.container.querySelector(s);
+		if(e != null && get != null) e = get(e);
+		return e == null?null:$dom.siblings(e,{ back : true}).length;
+	}
+	,get: function(id) {
+		return js.Browser.document.querySelector("li[data-id=" + id + "]").innerText;
+	}
+	,set: function(id,name) {
+		var old = js.Browser.document.querySelector("li[data-id=" + id + "] div");
+		if(old != null) old.innerHTML = name; else {
+			var list = js.Browser.document.querySelector(StringTools.startsWith(id,"row")?this.rows:this.cols);
+			list.insertBefore($dom.add($dom.set($dom.tag("li"),"data-id",id),$dom.add($dom.tag("div"),js.Browser.document.createTextNode(name))),list.lastElementChild);
+		}
+	}
+	,__class__: Grid
+}
 var HxOverrides = function() { }
 HxOverrides.__name__ = true;
 HxOverrides.cca = function(s,index) {
 	var x = s.charCodeAt(index);
 	if(x != x) return undefined;
 	return x;
+}
+HxOverrides.substr = function(s,pos,len) {
+	if(pos != null && pos != 0 && len != null && len < 0) return "";
+	if(len == null) len = s.length;
+	if(pos < 0) {
+		pos = s.length + pos;
+		if(pos < 0) pos = 0;
+	} else if(len < 0) len = s.length + len - pos;
+	return s.substr(pos,len);
 }
 HxOverrides.remove = function(a,obj) {
 	var i = 0;
@@ -36,9 +203,9 @@ Lambda.foreach = function(it,f) {
 	}
 	return true;
 }
-var tink = {}
-tink.Lang = function() { }
-tink.Lang.__name__ = true;
+var js = {}
+js.Browser = function() { }
+js.Browser.__name__ = true;
 var $dom = function() { }
 $dom.__name__ = true;
 $dom.invalidate = function(this1) {
@@ -73,6 +240,10 @@ $dom.set = function(this1,s,value) {
 }
 $dom.add = function(this1,h,before) {
 	if(before == null) this1.appendChild(h); else this1.insertBefore(h,before);
+	return this1;
+}
+$dom.remove = function(this1,n) {
+	this1.removeChild(n);
 	return this1;
 }
 $dom.get_nodeName = function(this1) {
@@ -189,15 +360,23 @@ $dom.set_id = function(this1,param) {
 		return $r;
 	}(this));
 }
+$dom.get_innerHTML = function(this1) {
+	return this1.innerHTML;
+}
+$dom.set_innerHTML = function(this1,param) {
+	return (function($this) {
+		var $r;
+		this1.innerHTML = param;
+		$r = param;
+		return $r;
+	}(this));
+}
 $dom.get_style = function(this1) {
 	return this1.style;
 }
 $dom.contains = function(this1,other) {
 	return this1.contains(other);
 }
-var js = {}
-js.Browser = function() { }
-js.Browser.__name__ = true;
 var Reflect = function() { }
 Reflect.__name__ = true;
 Reflect.field = function(o,field) {
@@ -218,90 +397,190 @@ Reflect.fields = function(o) {
 	}
 	return a;
 }
-var IMap = function() { }
-IMap.__name__ = true;
-var haxe = {}
-haxe.ds = {}
-haxe.ds.StringMap = function() {
-	this.h = { };
-};
-haxe.ds.StringMap.__name__ = true;
-haxe.ds.StringMap.__interfaces__ = [IMap];
-haxe.ds.StringMap.prototype = {
-	exists: function(key) {
-		return this.h.hasOwnProperty("$" + key);
-	}
-	,get: function(key) {
-		return this.h["$" + key];
-	}
-	,set: function(key,value) {
-		this.h["$" + key] = value;
-	}
-	,__class__: haxe.ds.StringMap
-}
 var Main = function() {
 };
 Main.__name__ = true;
 Main.__interfaces__ = [tink.Lang];
-Main.main = function() {
-	Main.on("mousedown","div.canvas.focused > *",Main.resizeFragment);
-	Main.on("mousedown","div.canvas.focused div.content:not([contenteditable])",Main.dragFragment);
-	Main.on("click","div.canvas.focused > div.text",Main.editText);
-	Main.on("mousedown","#viewport[data-focus=canvas] .bg",Main.newElement);
+Main.colName = function() {
+	return "Spalte " + (Main.grid.get_width() + 1);
 }
-Main.newElement = function(e) {
-	var layer = js.Browser.document.querySelector(".canvas.focused"), fresh = null, x = e.a.pageX, y = e.a.pageY, width = 0;
-	(tink.core._Signal.Signal_Impl_.next(tinx.dom._Events.Events_Impl_.event(Main.root,"mouseup")))(tink.core._Callback.CallbackLink_Impl_.toCallback((tinx.dom._Events.Events_Impl_.event(Main.root,"mousemove"))(function(m) {
-		if(fresh == null) {
-			fresh = js.Browser.document.querySelector("div.fresh>.text").cloneNode(true);
-			$dom.add(layer,fresh);
-			fresh.style.left = x + "px";
-			fresh.style.top = y + "px";
-		}
-		width = m.pageX - x;
-		if(width < 0) width *= -1;
-		if(width < Main.minWidth(0)) fresh.style.opacity = "0"; else {
-			fresh.style.removeProperty("opacity");
-			fresh.style.width = width + "px";
-			fresh.style.left = (m.pageX < x?m.pageX:x) + "px";
-		}
-	})));
-	(tink.core._Signal.Signal_Impl_.next(tinx.dom._Events.Events_Impl_.event(Main.root,"mouseup")))(function(m) {
-		if(fresh != null) {
-			Main.skipClick();
-			if(fresh.style.opacity == "0") layer.removeChild(fresh);
+Main.rowName = function() {
+	return "Reihe " + (Main.grid.get_height() + 1);
+}
+Main.main = function() {
+	Main.on("mousedown","#viewport[data-focus=canvas] div.canvas.focused > *",Main.resizeFragment);
+	Main.on("mousedown","#viewport[data-focus=canvas] div.canvas.focused div.content:not([contenteditable])",Main.dragFragment);
+	Main.on("dblclick","#viewport[data-focus=canvas] div.canvas.focused > .zoom-layer > div.text",Main.editText);
+	Main.on("click","#viewport[data-focus=canvas] div.canvas.focused > .zoom-layer > div",function(e) {
+		Main.toTop(e.b);
+	});
+	Main.on("dragenter dragover drop dragstart","body",function(e) {
+		e.a.preventDefault();
+	});
+	Main.on("drop","#viewport[data-focus=canvas] .bg",function(e) {
+		var m = e.a;
+		var layer = js.Browser.document.querySelector(".canvas.focused .zoom-layer");
+		var pos = _Matrix.Matrix_Impl_.transformPoint(_Matrix.Matrix_Impl_.invert(Main.getMatrix(layer)),{ a : e.a.pageX, b : e.a.pageY - 10});
+		var _g = 0, _g1 = m.dataTransfer.files;
+		while(_g < _g1.length) {
+			var file = _g1[_g];
+			++_g;
+			var reader = [new FileReader()];
+			reader[0].readAsDataURL(file);
+			reader[0].addEventListener("loadend",(function(reader) {
+				return function(_) {
+					$dom.add(layer,$dom.add($dom.set($dom.set($dom.tag("div"),"class","img"),"style","top: " + pos.b + "px; left: " + pos.a + "px"),$dom.add($dom.set($dom.tag("div"),"class","content"),$dom.set($dom.tag("img"),"src",reader[0].result))));
+				};
+			})(reader));
 		}
 	});
+	Main.on("dblclick","#viewport[data-focus=canvas] .bg",Main.newElement);
+	Main.on("mousewheel","#viewport[data-focus=canvas]",Main.zoom);
+	Main.on("mousedown","#viewport[data-focus=canvas] .bg",Main.dragCanvas);
+	Main.on("dblclick","#viewport[data-focus=table] .canvas",function(e) {
+		Main.clearHelper();
+		Main.grid.navigateTo(e.b);
+	});
+	Main.on("click","[data-action=\"add first\"]",function(r) {
+		Main.addFirst();
+	});
+	Main.on("click","[data-action=\"add row\"]",function(r) {
+		Main.addRow();
+	});
+	Main.on("click","[data-action=\"add col\"]",function(r) {
+		Main.addCol();
+	});
+	Main.on("click","[data-action=\"next row\"]",function(r) {
+		Main.grid.navigate(Main.grid.get_row() + 1,Main.grid.get_col());
+	});
+	Main.on("click","[data-action=\"prev row\"]",function(r) {
+		Main.grid.navigate(Main.grid.get_row() - 1,Main.grid.get_col());
+	});
+	Main.on("click","[data-action=\"next col\"]",function(r) {
+		Main.grid.navigate(Main.grid.get_row(),Main.grid.get_col() + 1);
+	});
+	Main.on("click","[data-action=\"prev col\"]",function(r) {
+		Main.grid.navigate(Main.grid.get_row(),Main.grid.get_col() - 1);
+	});
+	Main.on("click","[data-action=\"view table\"]",function(r) {
+		Main.jumpToTable();
+	});
+}
+Main.clearHelper = function() {
+	var _g1 = 0, _g = Main.helperSheet.cssRules.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		Main.helperSheet.deleteRule(0);
+	}
+}
+Main.jumpToTable = function() {
+	var top = Math.POSITIVE_INFINITY, bottom = Math.NEGATIVE_INFINITY, left = Math.POSITIVE_INFINITY, right = Math.NEGATIVE_INFINITY;
+	Main.clearHelper();
+	Main.helperSheet.addRule("#viewport .canvas .zoom-layer","-webkit-transform: none !important;");
+	var _g = 0, _g1 = js.Browser.document.querySelectorAll(".zoom-layer>*");
+	while(_g < _g1.length) {
+		var e = _g1[_g];
+		++_g;
+		var e1 = e;
+		var rect = e1.getBoundingClientRect();
+		top = Math.min(top,rect.top);
+		left = Math.min(left,rect.left);
+		right = Math.max(right,rect.right);
+		bottom = Math.max(bottom,rect.bottom);
+	}
+	var width = right - left, height = bottom - top, ratio = 200 / 150;
+	Main.clearHelper();
+	var m = _Matrix.Matrix_Impl_.concat((function($this) {
+		var $r;
+		var p = (function($this) {
+			var $r;
+			var p1 = { a : left, b : top};
+			$r = { a : -p1.a, b : -p1.b};
+			return $r;
+		}($this));
+		$r = { a : 1, b : 0, c : 0, d : 1, tx : p.a, ty : p.b};
+		return $r;
+	}(this)),(function($this) {
+		var $r;
+		var factor = Math.min(200 / width,150 / height);
+		$r = { a : factor, b : 0, c : 0, d : factor, tx : 0, ty : 0};
+		return $r;
+	}(this)));
+	Main.helperSheet.addRule("#viewport .canvas .zoom-layer","-webkit-transform: " + _Matrix.Matrix_Impl_.toString(m) + " !important;");
+	$dom.set(Main.viewport,"data-focus","table");
+}
+Main.addFirst = function() {
+	var row = Main.rowName(), col = Main.colName();
+	Main.grid.addRow(row);
+	Main.grid.addCol(col);
+	if(Main.viewport.getAttribute("data-focus") == "canvas") Main.grid.navigate(0,0);
+}
+Main.addRow = function() {
+	if(Main.grid.get_empty()) Main.addFirst(); else {
+		Main.grid.addRow(Main.rowName());
+		if(Main.viewport.getAttribute("data-focus") == "canvas") Main.grid.navigate(Main.grid.get_col(),Main.grid.get_row());
+	}
+}
+Main.addCol = function() {
+	if(Main.grid.get_empty()) Main.addFirst(); else {
+		Main.grid.addCol(Main.colName());
+		if(Main.viewport.getAttribute("data-focus") == "canvas") Main.grid.navigate(Main.grid.get_col(),Main.grid.get_row());
+	}
+}
+Main.newElement = function(e) {
+	var layer = js.Browser.document.querySelector(".canvas.focused .zoom-layer"), fresh = js.Browser.document.querySelector("div.fresh>.text").cloneNode(true);
+	var m = Main.getMatrix(layer);
+	var pos = _Matrix.Matrix_Impl_.transformPoint(_Matrix.Matrix_Impl_.invert(m),{ a : e.a.pageX, b : e.a.pageY - 10});
+	$dom.add(layer,fresh);
+	fresh.style.left = pos.a - 200 + "px";
+	fresh.style.top = pos.b - 50 + "px";
+	fresh.style.transition = "-webkit-transform .2s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+	fresh.style.webkitTransform = "scale(0, 0)";
+	($_=haxe.Timer.delay(function() {
+		fresh.style.webkitTransform = "scale(1, 1)";
+		Main.doEdit(fresh);
+		($_=haxe.Timer.delay(function() {
+			fresh.style.transition = null;
+			fresh.style.webkitTransform = null;
+		},300),$bind($_,$_.stop));
+	},0),$bind($_,$_.stop));
+}
+Main.getMatrix = function(elt) {
+	return (function($this) {
+		var $r;
+		var _g = Std.string(elt.style.webkitTransform).split("matrix(").pop().split(",").map(StringTools.trim).map(Std.parseFloat);
+		$r = (function($this) {
+			var $r;
+			switch(_g.length) {
+			case 6:
+				$r = { a : _g[0], b : _g[1], c : _g[2], d : _g[3], tx : _g[4], ty : _g[5]};
+				break;
+			default:
+				$r = _Matrix.Matrix_Impl_.IDENTITY;
+			}
+			return $r;
+		}($this));
+		return $r;
+	}(this));
+}
+Main.setMatrix = function(elt,m) {
+	elt.style.webkitTransform = _Matrix.Matrix_Impl_.toString(m);
 }
 Main.zoom = function(e) {
 	var w = e.a;
-	var _g = 0, _g1 = js.Browser.document.querySelectorAll(".canvas.focused");
+	var _g = 0, _g1 = js.Browser.document.querySelectorAll(".canvas.focused .zoom-layer");
 	while(_g < _g1.length) {
 		var elt = _g1[_g];
 		++_g;
-		var elt1 = elt;
-		var style = elt1.style;
-		var zoom = Std.parseFloat(style.webkitTransform.split("scale(")[1]), origin = (function($this) {
+		var elt1 = elt, fac = Math.pow(1.001,w.wheelDelta);
+		var m = Main.getMatrix(elt1);
+		var vCenter = _Matrix.Matrix_Impl_.transformPoint(_Matrix.Matrix_Impl_.invert(m),{ a : w.clientX, b : w.clientY});
+		Main.setMatrix(elt1,_Matrix.Matrix_Impl_.concat(_Matrix.Matrix_Impl_.concat(_Matrix.Matrix_Impl_.concat((function($this) {
 			var $r;
-			var _g2 = Std.string(style.webkitTransformOrigin).split("px ").map(Std.parseInt);
-			$r = (function($this) {
-				var $r;
-				switch(_g2.length) {
-				case 2:
-					$r = _g2[0] != null && _g2[1] != null?{ x : _g2[0], y : _g2[1]}:{ x : 0, y : 0};
-					break;
-				default:
-					$r = { x : 0, y : 0};
-				}
-				return $r;
-			}($this));
+			var p = { a : -vCenter.a, b : -vCenter.b};
+			$r = { a : 1, b : 0, c : 0, d : 1, tx : p.a, ty : p.b};
 			return $r;
-		}(this));
-		if(Math.isNaN(zoom)) zoom = 1;
-		var fac = Math.pow(1.001,w.wheelDelta);
-		zoom *= fac;
-		style.webkitTransformOrigin = "" + w.clientX + "px " + w.clientY + "px";
-		style.webkitTransform = "scale(" + zoom + ", " + zoom + ")";
+		}(this)),{ a : fac, b : 0, c : 0, d : fac, tx : 0, ty : 0}),{ a : 1, b : 0, c : 0, d : 1, tx : vCenter.a, ty : vCenter.b}),m));
 	}
 }
 Main.minWidth = function(w) {
@@ -341,9 +620,9 @@ Main.resizeFragment = function(e) {
 Main.toTop = function(e) {
 	$dom.add($dom.path(e,{ max : 1})[0],e);
 }
-Main.editText = function(e) {
-	Main.toTop(e.b);
-	var target = e.b.firstElementChild;
+Main.doEdit = function(target) {
+	Main.toTop(target);
+	target = target.firstElementChild;
 	var this1 = target;
 	this1.setAttribute("contenteditable","true");
 	"true";
@@ -353,6 +632,7 @@ Main.editText = function(e) {
 			var this1 = target;
 			this1.removeAttribute("contenteditable");
 			null;
+			if(target.innerHTML == "") $dom.remove($dom.path(target,{ max : 1})[0],target);
 		};
 		$r = function(r) {
 			f();
@@ -362,32 +642,72 @@ Main.editText = function(e) {
 	var elt = target;
 	elt.focus();
 }
+Main.editText = function(e) {
+	Main.doEdit(e.b);
+}
+Main.dragCanvas = function(e) {
+	var _g = 0, _g1 = js.Browser.document.querySelectorAll(".canvas.focused .zoom-layer");
+	while(_g < _g1.length) {
+		var elt = _g1[_g];
+		++_g;
+		var target = [elt];
+		var m0 = [Main.getMatrix(target[0])];
+		var m = [_Matrix.Matrix_Impl_.invert(m0[0])];
+		var p = [_Matrix.Matrix_Impl_.transformPoint(m[0],{ a : e.a.pageX, b : e.a.pageY})];
+		(tink.core._Signal.Signal_Impl_.next(tinx.dom._Events.Events_Impl_.event(Main.root,"mouseup")))(tink.core._Callback.CallbackLink_Impl_.toCallback((tinx.dom._Events.Events_Impl_.event(Main.root,"mousemove"))((function(p,m,m0,target) {
+			return function(e1) {
+				var nu = _Matrix.Matrix_Impl_.concat(m0[0],(function($this) {
+					var $r;
+					var p1 = (function($this) {
+						var $r;
+						var a = _Matrix.Matrix_Impl_.transformPoint(m[0],{ a : e1.pageX, b : e1.pageY});
+						$r = { a : a.a - p[0].a, b : a.b - p[0].b};
+						return $r;
+					}($this));
+					$r = { a : 1, b : 0, c : 0, d : 1, tx : p1.a, ty : p1.b};
+					return $r;
+				}(this)));
+				Main.setMatrix(target[0],nu);
+			};
+		})(p,m,m0,target))));
+	}
+}
 Main.dragFragment = function(e) {
 	var target = $dom.path(e.b,{ max : 1})[0];
-	console.log(e.a);
-	var x = e.a.pageX, y = e.a.pageY;
-	var x0 = (function($this) {
+	var m = _Matrix.Matrix_Impl_.invert(Main.getMatrix($dom.path(target,{ max : 1})[0]));
+	var p = _Matrix.Matrix_Impl_.transformPoint(m,{ a : e.a.pageX, b : e.a.pageY});
+	var p0 = { a : (function($this) {
 		var $r;
 		var ___val = Std.parseInt(target.style.left);
 		$r = ___val == null?0:___val;
 		return $r;
-	}(this)), y0 = (function($this) {
+	}(this)), b : (function($this) {
 		var $r;
 		var ___val = Std.parseInt(target.style.top);
 		$r = ___val == null?0:___val;
 		return $r;
-	}(this));
+	}(this))};
 	var moved = false;
-	(tink.core._Signal.Signal_Impl_.next(tinx.dom._Events.Events_Impl_.event(Main.root,"mouseup")))(tink.core._Callback.CallbackLink_Impl_.toCallback((tinx.dom._Events.Events_Impl_.event(Main.root,"mousemove"))(function(m) {
-		console.log(m);
+	(tink.core._Signal.Signal_Impl_.next(tinx.dom._Events.Events_Impl_.event(Main.root,"mouseup")))(tink.core._Callback.CallbackLink_Impl_.toCallback((tinx.dom._Events.Events_Impl_.event(Main.root,"mousemove"))(function(e1) {
 		if(!moved) {
 			Main.toTop(target);
 			moved = true;
 		}
-		target.style.left = x0 + m.pageX - x + "px";
-		target.style.top = y0 + m.pageY - y + "px";
+		var nu = (function($this) {
+			var $r;
+			var a = (function($this) {
+				var $r;
+				var b = _Matrix.Matrix_Impl_.transformPoint(m,{ a : e1.pageX, b : e1.pageY});
+				$r = { a : p0.a + b.a, b : p0.b + b.b};
+				return $r;
+			}($this));
+			$r = { a : a.a - p.a, b : a.b - p.b};
+			return $r;
+		}(this));
+		target.style.left = nu.a + "px";
+		target.style.top = nu.b + "px";
 	})));
-	(tink.core._Signal.Signal_Impl_.next(tinx.dom._Events.Events_Impl_.event(Main.root,"mouseup")))(function(m) {
+	(tink.core._Signal.Signal_Impl_.next(tinx.dom._Events.Events_Impl_.event(Main.root,"mouseup")))(function(m1) {
 		if(moved) Main.skipClick();
 	});
 }
@@ -400,13 +720,18 @@ Main.skipClick = function() {
 	},100),$bind($_,$_.stop));
 }
 Main.on = function(event,selector,handler) {
-	if(!Main.handlers.exists(event)) {
-		var v = [];
-		Main.handlers.set(event,v);
-		v;
-		js.Browser.document.addEventListener(event,Main.handleEvent,true);
+	var _g = 0, _g1 = event.split(" ");
+	while(_g < _g1.length) {
+		var event1 = _g1[_g];
+		++_g;
+		if(!Main.handlers.exists(event1)) {
+			var v = [];
+			Main.handlers.set(event1,v);
+			v;
+			js.Browser.document.addEventListener(event1,Main.handleEvent,true);
+		}
+		Main.handlers.get(event1).push({ a : selector, b : handler});
 	}
-	Main.handlers.get(event).push({ a : selector, b : handler});
 }
 Main.handleEvent = function(e) {
 	if(Main.muted.get(e.type)) return;
@@ -424,6 +749,79 @@ Main.handleEvent = function(e) {
 Main.prototype = {
 	__class__: Main
 }
+var IMap = function() { }
+IMap.__name__ = true;
+var _Matrix = {}
+_Matrix.Matrix_Impl_ = function() { }
+_Matrix.Matrix_Impl_.__name__ = true;
+_Matrix.Matrix_Impl_.get_a = function(this1) {
+	return this1.a;
+}
+_Matrix.Matrix_Impl_.get_b = function(this1) {
+	return this1.b;
+}
+_Matrix.Matrix_Impl_.get_c = function(this1) {
+	return this1.c;
+}
+_Matrix.Matrix_Impl_.get_d = function(this1) {
+	return this1.d;
+}
+_Matrix.Matrix_Impl_.get_tx = function(this1) {
+	return this1.tx;
+}
+_Matrix.Matrix_Impl_.get_ty = function(this1) {
+	return this1.ty;
+}
+_Matrix.Matrix_Impl_._new = function(a,b,c,d,tx,ty) {
+	return { a : a, b : b, c : c, d : d, tx : tx, ty : ty};
+}
+_Matrix.Matrix_Impl_.invert = function(m) {
+	var det = m.a * m.d - m.c * m.b;
+	var a = m.d / det, b = -m.b / det, c = -m.c / det, d = m.a / det;
+	return { a : a, b : b, c : c, d : d, tx : -(a * m.tx + c * m.ty), ty : -(b * m.tx + d * m.ty)};
+}
+_Matrix.Matrix_Impl_.transformPoint = function(m,p) {
+	return { a : m.a * p.a + m.c * p.b + m.tx, b : m.b * p.a + m.d * p.b + m.ty};
+}
+_Matrix.Matrix_Impl_.concat = function(m,n) {
+	return { a : n.a * m.a + n.c * m.b, b : n.b * m.a + n.d * m.b, c : n.a * m.c + n.c * m.d, d : n.b * m.c + n.d * m.d, tx : n.a * m.tx + n.c * m.ty + n.tx, ty : n.b * m.tx + n.d * m.ty + n.ty};
+}
+_Matrix.Matrix_Impl_.toString = function(this1) {
+	return "matrix(" + this1.a + ", " + this1.b + ", " + this1.c + ", " + this1.d + ", " + this1.tx + ", " + this1.ty + ")";
+}
+_Matrix.Matrix_Impl_.rotate = function(angle) {
+	return { a : Math.cos(angle), b : -Math.sin(angle), c : Math.sin(angle), d : Math.cos(angle), tx : 0, ty : 0};
+}
+_Matrix.Matrix_Impl_.scale = function(factor) {
+	return { a : factor, b : 0, c : 0, d : factor, tx : 0, ty : 0};
+}
+_Matrix.Matrix_Impl_.move = function(p) {
+	return { a : 1, b : 0, c : 0, d : 1, tx : p.a, ty : p.b};
+}
+var _Point = {}
+_Point.Point_Impl_ = function() { }
+_Point.Point_Impl_.__name__ = true;
+_Point.Point_Impl_.get_x = function(this1) {
+	return this1.a;
+}
+_Point.Point_Impl_.get_y = function(this1) {
+	return this1.b;
+}
+_Point.Point_Impl_._new = function(x,y) {
+	return { a : x, b : y};
+}
+_Point.Point_Impl_.toString = function(this1) {
+	return "(" + this1.a + ", " + this1.b + ")";
+}
+_Point.Point_Impl_.add = function(a,b) {
+	return { a : a.a + b.a, b : a.b + b.b};
+}
+_Point.Point_Impl_.subtract = function(a,b) {
+	return { a : a.a - b.a, b : a.b - b.b};
+}
+_Point.Point_Impl_.invert = function(p) {
+	return { a : -p.a, b : -p.b};
+}
 var Std = function() { }
 Std.__name__ = true;
 Std.string = function(s) {
@@ -438,6 +836,58 @@ Std.parseInt = function(x) {
 Std.parseFloat = function(x) {
 	return parseFloat(x);
 }
+Std.random = function(x) {
+	return x <= 0?0:Math.floor(Math.random() * x);
+}
+var StringTools = function() { }
+StringTools.__name__ = true;
+StringTools.startsWith = function(s,start) {
+	return s.length >= start.length && HxOverrides.substr(s,0,start.length) == start;
+}
+StringTools.isSpace = function(s,pos) {
+	var c = HxOverrides.cca(s,pos);
+	return c > 8 && c < 14 || c == 32;
+}
+StringTools.ltrim = function(s) {
+	var l = s.length;
+	var r = 0;
+	while(r < l && StringTools.isSpace(s,r)) r++;
+	if(r > 0) return HxOverrides.substr(s,r,l - r); else return s;
+}
+StringTools.rtrim = function(s) {
+	var l = s.length;
+	var r = 0;
+	while(r < l && StringTools.isSpace(s,l - r - 1)) r++;
+	if(r > 0) return HxOverrides.substr(s,0,l - r); else return s;
+}
+StringTools.trim = function(s) {
+	return StringTools.ltrim(StringTools.rtrim(s));
+}
+var ValueType = { __ename__ : true, __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] }
+ValueType.TNull = ["TNull",0];
+ValueType.TNull.toString = $estr;
+ValueType.TNull.__enum__ = ValueType;
+ValueType.TInt = ["TInt",1];
+ValueType.TInt.toString = $estr;
+ValueType.TInt.__enum__ = ValueType;
+ValueType.TFloat = ["TFloat",2];
+ValueType.TFloat.toString = $estr;
+ValueType.TFloat.__enum__ = ValueType;
+ValueType.TBool = ["TBool",3];
+ValueType.TBool.toString = $estr;
+ValueType.TBool.__enum__ = ValueType;
+ValueType.TObject = ["TObject",4];
+ValueType.TObject.toString = $estr;
+ValueType.TObject.__enum__ = ValueType;
+ValueType.TFunction = ["TFunction",5];
+ValueType.TFunction.toString = $estr;
+ValueType.TFunction.__enum__ = ValueType;
+ValueType.TClass = function(c) { var $x = ["TClass",6,c]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; }
+ValueType.TEnum = function(e) { var $x = ["TEnum",7,e]; $x.__enum__ = ValueType; $x.toString = $estr; return $x; }
+ValueType.TUnknown = ["TUnknown",8];
+ValueType.TUnknown.toString = $estr;
+ValueType.TUnknown.__enum__ = ValueType;
+var haxe = {}
 haxe.Timer = function(time_ms) {
 	var me = this;
 	this.id = setInterval(function() {
@@ -464,11 +914,36 @@ haxe.Timer.prototype = {
 	}
 	,__class__: haxe.Timer
 }
+haxe.ds = {}
 haxe.ds.Option = { __ename__ : true, __constructs__ : ["Some","None"] }
 haxe.ds.Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe.ds.Option; $x.toString = $estr; return $x; }
 haxe.ds.Option.None = ["None",1];
 haxe.ds.Option.None.toString = $estr;
 haxe.ds.Option.None.__enum__ = haxe.ds.Option;
+haxe.ds.StringMap = function() {
+	this.h = { };
+};
+haxe.ds.StringMap.__name__ = true;
+haxe.ds.StringMap.__interfaces__ = [IMap];
+haxe.ds.StringMap.prototype = {
+	keys: function() {
+		var a = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
+		}
+		return HxOverrides.iter(a);
+	}
+	,exists: function(key) {
+		return this.h.hasOwnProperty("$" + key);
+	}
+	,get: function(key) {
+		return this.h["$" + key];
+	}
+	,set: function(key,value) {
+		this.h["$" + key] = value;
+	}
+	,__class__: haxe.ds.StringMap
+}
 js.Boot = function() { }
 js.Boot.__name__ = true;
 js.Boot.__string_rec = function(o,s) {
@@ -1347,6 +1822,12 @@ tink.core._Signal.SignalTrigger_Impl_.asSignal = function(this1) {
 		};
 	})(this1);
 }
+tink.macro = {}
+tink.macro.Bouncer = function() { }
+tink.macro.Bouncer.__name__ = true;
+tink.macro.Bouncer.makeOuter = function(a) {
+	return null;
+}
 var tinx = {}
 tinx.dom = {}
 tinx.dom._Attributes = {}
@@ -1576,12 +2057,20 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
-$dom.invalidated = [];
+Grid.chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 js.Browser.document = typeof window != "undefined" ? window.document : null;
+$dom.invalidated = [];
+Main.container = js.Browser.document.getElementById("container");
+Main.viewport = js.Browser.document.getElementById("viewport");
+Main.stateStore = js.Browser.document.getElementById("table-data");
+Main.grid = new Grid(js.Browser.document.getElementById("viewport"),js.Browser.document.getElementById("container"),"#cols","#rows",".nav");
+Main.AUTO_NAME = true;
+Main.helperSheet = js.Browser.document.getElementById("helper-sheet").sheet;
 Main.root = js.Browser.document.documentElement;
 Main.dummy = $dom.tag("div");
 Main.handlers = new haxe.ds.StringMap();
 Main.muted = new haxe.ds.StringMap();
+_Matrix.Matrix_Impl_.IDENTITY = { a : 1, b : 0, c : 0, d : 1, tx : 0, ty : 0};
 tink.core._Callback.Cell.pool = [];
 tinx.dom._Events.Events_Impl_.add = document.addEventListener?tinx.dom._Events.Events_Impl_.stdAdd:tinx.dom._Events.Events_Impl_.quirksAdd;
 Main.main();

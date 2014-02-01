@@ -1,18 +1,40 @@
+* {
+  box-sizing: border-box !important;
+}
+ol,
+div {
+  margin: 0;
+  padding: 0;
+}
 body {
-  background: #FFF;
+  background: white;
   font-family: DinC, sans-serif;
   padding: 0;
   margin: 0;
   overflow: hidden;
 }
+#container:empty ~ .nav .location {
+  display: none;
+}
+#container:empty ~ .nav > button:first-of-type {
+  display: inline;
+}
+#container:empty ~ .nav > button:nth-of-type(n+2) {
+  display: none;
+}
 .nav {
   user-select: none;
   -webkit-user-select: none;
+  overflow: hidden;
   position: fixed;
   top: 0;
   width: 100%;
   height: 150px;
+  transition: height 0.1s;
   background: #008000;
+}
+.nav > button:first-of-type {
+  display: none;
 }
 .nav .icon {
   height: 2em;
@@ -33,7 +55,82 @@ body {
 .nav h2:last-of-type {
   margin-left: 50px;
 }
-.bg {
+.fresh {
+  display: none;
+}
+#viewport[data-focus="table"] {
+  position: absolute;
+  overflow: auto;
+  top: 20px;
+  bottom: 0px;
+  left: 20px;
+  right: 0;
+}
+#viewport[data-focus="table"] [data-row] > div {
+  border-bottom: 2px solid #008000;
+  border-right: 2px solid #008000;
+}
+#viewport[data-focus="table"] .canvas {
+  display: inline-block;
+  position: relative;
+  width: 200px;
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#viewport[data-focus="table"] .canvas .zoom-layer {
+  pointer-events: none;
+}
+#viewport[data-focus="table"] #rows,
+#viewport[data-focus="table"] #cols {
+  user-select: none;
+  -webkit-user-select: none;
+  position: absolute;
+  white-space: nowrap;
+}
+#viewport[data-focus="table"] #rows li,
+#viewport[data-focus="table"] #cols li {
+  padding-top: 1em;
+  text-align: center;
+  width: 200px;
+  height: 150px;
+  list-style: none;
+}
+#viewport[data-focus="table"] #cols {
+  top: 0;
+  left: 198px;
+}
+#viewport[data-focus="table"] #cols li {
+  top: 0;
+  bottom: 0;
+  border-left: 2px solid #008000;
+  border-bottom: 2px solid #008000;
+  display: inline-block;
+  vertical-align: top;
+}
+#viewport[data-focus="table"] #rows {
+  left: 0;
+  top: 148px;
+}
+#viewport[data-focus="table"] #rows li {
+  border-top: 2px solid #008000;
+  border-right: 2px solid #008000;
+  display: block;
+}
+#viewport[data-focus="table"] #container {
+  position: relative;
+  top: 150px;
+  left: 200px;
+}
+#viewport[data-focus="table"] [data-row] {
+  height: 150px;
+  white-space: nowrap;
+}
+#viewport[data-focus="table"] .nav {
+  height: 0;
+}
+#viewport[data-focus="canvas"] .bg {
   background: white;
   position: fixed;
   top: 150px;
@@ -41,25 +138,33 @@ body {
   left: 0;
   right: 0;
 }
-.fresh {
-  display: none;
+#viewport[data-focus="canvas"] .canvas {
+  visibility: hidden;
+}
+#viewport[data-focus="canvas"] .canvas.focused {
+  visibility: visible;
 }
 .canvas {
-  cursor: ew-resize;
+  position: absolute;
+}
+.canvas .zoom-layer {
+  -webkit-transform-origin: 0 0;
+}
+.canvas .img {
+  position: absolute;
 }
 .canvas .text {
-  transition: opacity 0.5s;
+  border-left: #008000 solid 5px;
+  border-right: #008000 solid 5px;
   user-select: none;
   -webkit-user-select: none;
   position: absolute;
   font-size: .8em;
-  padding-left: 4px;
-  padding-right: 4px;
+  cursor: ew-resize;
 }
 .canvas .text .content {
   margin: 0;
   padding: 20px;
-  border: 2px dashed rgba(0, 128, 0, 0.3);
   background: rgba(245, 250, 245, 0.95);
   transition: border 0.2s, opacity 0.2s, background 0.2s;
 }
@@ -84,5 +189,4 @@ body {
 .canvas .text .content:hover,
 .canvas .text .content:focus {
   background: white;
-  border: 2px dashed #008000;
 }

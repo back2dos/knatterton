@@ -4,40 +4,27 @@
 		<meta charset="utf-8">
 		<title>Knatterton</title>
 		<link rel="stylesheet" type="text/css" href="styles.css">
+		<style id="helper-sheet"></style>
 	</head>
 	<body>
-		<div id="viewport" data-focus="canvas">
+		<div id="viewport" data-focus="table">
 			<div class="bg"></div>
-			<div data-row="Pulvrig">
-				<div class="canvas focused">
-					<div class="text" style="top: 200px; left: 120px; width: 400px;">
-						<div class="content">
-							<h1>HTML Ipsum Presents</h1>
-								       
-							<p><strong>Pellentesque habitant morbi tristique</strong> senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor</p>
-							
-							<h2>Header Level 2</h2>
-								       
-							<ol>
-							   <li>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</li>
-							   <li>Aliquam tincidunt mauris eu risus.</li>
-							</ol>
-							
-							<blockquote><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus magna. Cras in mi at felis aliquet congue. Ut a est eget ligula molestie gravida. Curabitur massa.</p></blockquote>
-							
-							<h3>Header Level 3</h3>
-							
-							<ul>
-							   <li>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</li>
-							   <li>Aliquam tincidunt mauris eu risus.</li>
-							</ul>
-						</div>
-					</div>						
-				</div>					
-			</div>
+			<div id="container"></div>
+			<ol id="cols">
+				<li data-action="add col"><h2>+</h2></li>
+			</ol>
+			<ol id="rows">
+				<li data-action="add row">+</li>
+			</ol>
 			<div class="nav">
-				<h2 class="name"><span>Pulvrig</span></h2>
-				<h2 class="name"><span>Transport</span></h2>
+				<div class="location">
+					<h2 class="name"><button data-action="prev col">Prev</button><span>...</span><button data-action="next col">Next</button></h2>
+					<h2 class="name"><button data-action="prev row">Prev</button><span>...</span><button data-action="next row">Next</button></h2>
+				</div>
+				<button data-action="add first">Add First</button>
+				<button data-action="add row">Add Row</button>
+				<button data-action="add col">Add Col</button>
+				<button data-action="view table">Table</button>
 			</div>		
 			<div class="fresh">
 				<div class="text" style="top: 200px; left: 300px; width: 400px;">
