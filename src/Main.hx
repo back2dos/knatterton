@@ -48,10 +48,7 @@ class Main implements tink.Lang {
 			var layer:Element = cast document.querySelector('.canvas.focused .zoom-layer');
 			
 			var pos = !getMatrix(layer) * new Point(e.a.pageX, e.a.pageY - 10);
-			// layer.add(fresh);
 			
-			// fresh.style.left = (pos.x - 200) +'px';
-			// fresh.style.top = (pos.y - 50) +'px';			
 			for (file in m.dataTransfer.files) {
 				var reader = new js.html.FileReader();
 				reader.readAsDataURL(file);
